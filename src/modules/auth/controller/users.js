@@ -5,6 +5,7 @@ import { encrypt, cryptGenerate } from '../../../utils/bcrypt'
 import { addHours } from '../../../utils/date'
 import { strongPassword } from '../../../utils/validate.regex'
 import transporter from '../../mailer'
+import { signJWT } from '../config/jwt'
 
 export async function registerUser({ email, username, password }) {
   if (!email && !username) {
@@ -18,9 +19,7 @@ export async function registerUser({ email, username, password }) {
   }
   password = await encrypt(password)
 
-  const validationToken = cryptGenerate()
-
-  const tokenExpiration = addHours(Date.now(), 4)
+  const { validationToken, tokenExpiration } = generateTokenValidation()
 
   return {
     username,
@@ -29,6 +28,33 @@ export async function registerUser({ email, username, password }) {
     validation_token: validationToken,
     token_expiration: tokenExpiration
   }
+}
+
+export function generateTokenValidation() {
+  const validationToken = cryptGenerate()
+  const tokenExpiration = addHours(Date.now(), 4)
+  return { validationToken, tokenExpiration }
+}
+
+export async function sendForgotPasswordEmail({
+  username,
+  email,
+  validation_token: token
+}) {
+  await transporter.sendMail({
+    from: `"${username}" <${email}>`,
+    to: 'automatic@email.com',
+    subject: 'forgot password',
+    text: 'automatic email, do not reply',
+    html: `
+    <h1>Hello ${username}?</h1>
+
+    <p>please, click in this link for generate new password</p>
+
+    <br/>
+    <a href="http://localhost:3000/auth/replay_password/${token()}">CONFIRM</a>
+    `
+  })
 }
 
 export async function sendConfirmEmail({
@@ -74,10 +100,21 @@ export function whereAuthenticate({ email, username, password }) {
   return { where }
 }
 
-export async function checkUserBeforeAutenticate(body, user) {
-  if (!user.active_account) throw badData('account not enabled')
+export async function checkUserAndGenerateToken(body, user) {
+  checkUserAccount(user)
 
   const match = await compare(body.password, user.password())
 
   if (!match) throw badData('incorrect password')
+
+  return signJWT({ userId: user.id })
+}
+
+export function checkEmail({ email }) {
+  if (!email) throw badData('please provide your email')
+}
+
+export function checkUserAccount(user) {
+  if (!user) throw badData('no user found for this email')
+  if (!user.active_account) throw badData('account not enabled')
 }
