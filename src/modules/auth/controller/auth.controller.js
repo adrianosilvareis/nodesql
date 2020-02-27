@@ -66,21 +66,6 @@ export const forgotPassword = async ctx => {
   }
 }
 
-export const replayPassword = async ctx => {
-  try {
-    const { userId } = ctx.state.user
-    const { password } = ctx.request.body
-
-    const user = await User.findByPk(userId)
-    user.password = await encrypt(password)
-    const newUser = await user.save()
-
-    ctx.body = newUser
-  } catch (error) {
-    ctx.throw(error)
-  }
-}
-
 export const activateAccount = async ctx => {
   const { token } = ctx.params
   try {

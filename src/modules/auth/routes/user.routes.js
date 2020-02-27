@@ -1,15 +1,19 @@
 import Router from 'koa-router'
 
-import { replayPassword } from '../controller/auth.controller'
+import {
+  index,
+  replayPassword,
+  getUser,
+  cancelUser
+} from '../controller/user.controller'
 
 const router = new Router({
-  prefix: '/user'
+  prefix: '/users'
 })
 
-router.post('/', replayPassword) // crear
-router.get('/:id', replayPassword) // obter
-router.put('/:id', replayPassword) // autalizar
-router.delete('/:id', replayPassword) // deletar
+router.get('/list', index)
+router.get('/:id', getUser)
+router.patch('/:id/cancel', cancelUser)
 router.put('/replay_password', replayPassword)
 
 module.exports = app => {
