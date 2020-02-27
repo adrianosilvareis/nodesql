@@ -1,8 +1,8 @@
 import { Op } from 'sequelize'
 
-import { encrypt } from '../../../utils/bcrypt'
 import { signJWT } from '../config/jwt'
 import User from '../models/MdaUser'
+import { createSession } from './session.controller'
 import {
   registerUser,
   sendConfirmEmail,
@@ -36,12 +36,10 @@ export const register = async ctx => {
 export const authenticate = async ctx => {
   try {
     const body = ctx.request.body
-
     const user = await User.findOne(whereAuthenticate(body))
-
     const token = await checkUserAndGenerateToken(body, user)
-
-    ctx.body = { token }
+    const sessions = await createSession(user, token)
+    ctx.body = { token, sessions }
   } catch (error) {
     ctx.throw(error)
   }
