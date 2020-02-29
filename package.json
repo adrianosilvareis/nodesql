@@ -1,13 +1,14 @@
 {
   "name": "sqlnode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
     "start": "cross-env NODE_ENV=development npx nodemon src/serve.js",
     "server": "cross-env NODE_ENV=production npx nodemon src/serve.js",
-    "commit": "npx git-cz"
+    "commit": "npx git-cz",
+    "changelog": "npx auto-changelog --commit-limit false -p"
   },
   "dependencies": {
     "bcrypt": "^4.0.0",
@@ -30,6 +31,7 @@
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@sucrase/jest-plugin": "^2.0.0",
+    "auto-changelog": "^1.16.2",
     "chai": "^4.2.0",
     "commitizen": "^4.0.3",
     "cross-env": "^6.0.3",
